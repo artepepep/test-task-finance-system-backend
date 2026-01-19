@@ -14,3 +14,5 @@
 - Request: connect the base entity to all existing entities.
 - Request: create a transactions module with an empty entity extending BaseEntity.
 - Request: fix migration run schema error by setting DB schema in the data source.
+- Request: fix JWT sign typing error in auth service.
+- Request: add Swagger API descriptions and ApiProperty metadata for all endpoints.
