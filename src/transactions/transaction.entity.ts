@@ -4,6 +4,7 @@ import { Account } from '../accounts/accounts.entity';
 import { BaseEntity } from '../shared/entities/base.entity';
 import { Currency } from '../shared/enums/currency.enum';
 import { User } from '../users/user.entity';
+import { TransactionType } from './enums/transaction-type.enum';
 
 @Entity({ name: 'transactions' })
 export class Transaction extends BaseEntity {
@@ -26,4 +27,7 @@ export class Transaction extends BaseEntity {
 
   @Column({ type: 'enum', enum: Currency })
   currency: Currency;
+
+  @Column({ type: 'enum', enum: TransactionType })
+  type: TransactionType;
 }

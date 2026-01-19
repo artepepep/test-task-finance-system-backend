@@ -13,6 +13,9 @@ export class Account extends BaseEntity {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
+  @Column({ type: 'numeric', precision: 18, scale: 2 })
+  balance: string;
+
   @Column({ type: 'enum', enum: Currency })
   currency: Currency;
 }

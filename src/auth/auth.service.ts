@@ -3,7 +3,11 @@ import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { JwtPayload, SignOptions } from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
+import { DataSource } from 'typeorm';
 
+import { Account } from '../accounts/accounts.entity';
+import { Currency } from '../shared/enums/currency.enum';
+import { User } from '../users/user.entity';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -14,6 +18,7 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
+    private readonly dataSource: DataSource,
   ) {}
 
   async register(dto: RegisterDto) {
@@ -23,11 +28,24 @@ export class AuthService {
     }
 
     const passwordHash = await bcrypt.hash(dto.password, 10);
-    const user = await this.usersService.create({
-      email: dto.email,
-      name: dto.name,
-      surname: dto.surname,
-      password: passwordHash,
+    const user = await this.dataSource.transaction(async (manager) => {
+      const usersRepo = manager.getRepository(User);
+      const accountsRepo = manager.getRepository(Account);
+      const createdUser = usersRepo.create({
+        email: dto.email,
+        name: dto.name,
+        surname: dto.surname,
+        password: passwordHash,
+      });
+      const savedUser = await usersRepo.save(createdUser);
+
+      const accounts = accountsRepo.create([
+        { userId: savedUser.id, currency: Currency.EUR, balance: '500' },
+        { userId: savedUser.id, currency: Currency.USD, balance: '1000' },
+      ]);
+      await accountsRepo.save(accounts);
+
+      return savedUser;
     });
 
     const tokens = await this.createTokens(user.id, user.email);

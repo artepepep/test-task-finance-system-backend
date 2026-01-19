@@ -16,3 +16,7 @@
 - Request: fix migration run schema error by setting DB schema in the data source.
 - Request: fix JWT sign typing error in auth service.
 - Request: add Swagger API descriptions and ApiProperty metadata for all endpoints.
+- Request: ask about typing balance/amount fields as string.
+- Request: fix Account metadata error by registering Account entity with TypeORM module.
+- Request: advise whether to return Account entity array or use DTO/type for getAll response.
+- Request: handle not found error API docs.
