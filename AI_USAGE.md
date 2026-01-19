@@ -7,3 +7,4 @@
 - Request: read the server port via ConfigService in NestJS bootstrap.
 - Request: add /health endpoint and a welcome message at /.
 - Request: create an empty ORM entity in the users module.
+- Request: add .yarn and .vscode to gitignore.
