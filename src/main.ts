@@ -1,4 +1,5 @@
 import { ConfigService } from '@nestjs/config';
+import { Logger } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { SwaggerModule } from '@nestjs/swagger';
 
@@ -7,6 +8,7 @@ import { swaggerConfig } from './config/swagger.config';
 import { validationPipe } from './shared/pipes/validation.pipe';
 
 async function bootstrap() {
+  const logger = new Logger('Bootstrap');
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
 
@@ -17,5 +19,6 @@ async function bootstrap() {
 
   const port = Number(configService.get<string>('PORT', '3000'));
   await app.listen(port);
+  logger.log(`🚀Application is running on port: ${port}`);
 }
 bootstrap();

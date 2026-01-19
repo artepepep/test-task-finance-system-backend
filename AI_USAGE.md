@@ -8,3 +8,9 @@
 - Request: add /health endpoint and a welcome message at /.
 - Request: create an empty ORM entity in the users module.
 - Request: add .yarn and .vscode to gitignore.
+- Request: generate an empty ORM entity for accounts.
+- Request: generate a empty ledger entity and connect it to the ledger repository.
+- Request: create a base entity with id and createdAt.
+- Request: connect the base entity to all existing entities.
+- Request: create a transactions module with an empty entity extending BaseEntity.
+- Request: fix migration run schema error by setting DB schema in the data source.
