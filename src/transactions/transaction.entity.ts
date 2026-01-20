@@ -3,24 +3,23 @@ import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { Account } from '../accounts/accounts.entity';
 import { BaseEntity } from '../shared/entities/base.entity';
 import { Currency } from '../shared/enums/currency.enum';
-import { User } from '../users/user.entity';
 import { TransactionType } from './enums/transaction-type.enum';
 
 @Entity({ name: 'transactions' })
 export class Transaction extends BaseEntity {
-  @Column({ type: 'uuid', name: 'user_id' })
-  userId: string;
-
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'user_id' })
-  user: User;
-
-  @Column({ type: 'uuid', name: 'account_id' })
-  accountId: string;
+  @Column({ type: 'uuid', name: 'from_account_id' })
+  fromAccountId: string;
 
   @ManyToOne(() => Account, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'account_id' })
-  account: Account;
+  @JoinColumn({ name: 'from_account_id' })
+  fromAccount: Account;
+
+  @Column({ type: 'uuid', name: 'to_account_id' })
+  toAccountId: string;
+
+  @ManyToOne(() => Account, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'to_account_id' })
+  toAccount: Account;
 
   @Column({ type: 'numeric', precision: 18, scale: 2 })
   amount: string;

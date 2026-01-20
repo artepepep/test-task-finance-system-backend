@@ -20,3 +20,12 @@
 - Request: fix Account metadata error by registering Account entity with TypeORM module.
 - Request: advise whether to return Account entity array or use DTO/type for getAll response.
 - Request: handle not found error API docs.
+- Request: implement all necessary functions for the users repository.
+- Request: refactor transactional user+accounts creation into UsersService helper.
+- Request: advise on fields to add to the transaction entity (from/to or similar).s.
+- Request: fix Prettier decorators parser error with import sort plugin.
+- Request: add find method to transaction repository.
+- Request: document the transaction controller endpoints.
+- Request: fix empty Swagger schema for transfer/exchange DTOs.
+- Request: create a .env.example file.
+- Request: update README with project description and features.

@@ -1,6 +1,13 @@
 import { Body, Controller, Get, Post, Req, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth, ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+
 import type { Request } from 'express';
 
 import { AuthService } from './auth.service';
@@ -42,7 +49,7 @@ export class AuthController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current user from access token' })
   @ApiResponse({ status: 200, description: 'User payload' })
-  async me(@Req() req: Request) {
+  me(@Req() req: Request) {
     return req.user;
   }
 }

@@ -1,13 +1,19 @@
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-call */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+import {
+  ConflictException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
-import { JwtPayload, SignOptions } from 'jsonwebtoken';
+
 import bcrypt from 'bcryptjs';
+import { JwtPayload, SignOptions } from 'jsonwebtoken';
 import { DataSource } from 'typeorm';
 
-import { Account } from '../accounts/accounts.entity';
 import { Currency } from '../shared/enums/currency.enum';
-import { User } from '../users/user.entity';
 import { UsersService } from '../users/users.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
@@ -28,25 +34,21 @@ export class AuthService {
     }
 
     const passwordHash = await bcrypt.hash(dto.password, 10);
-    const user = await this.dataSource.transaction(async (manager) => {
-      const usersRepo = manager.getRepository(User);
-      const accountsRepo = manager.getRepository(Account);
-      const createdUser = usersRepo.create({
-        email: dto.email,
-        name: dto.name,
-        surname: dto.surname,
-        password: passwordHash,
-      });
-      const savedUser = await usersRepo.save(createdUser);
-
-      const accounts = accountsRepo.create([
-        { userId: savedUser.id, currency: Currency.EUR, balance: '500' },
-        { userId: savedUser.id, currency: Currency.USD, balance: '1000' },
-      ]);
-      await accountsRepo.save(accounts);
-
-      return savedUser;
-    });
+    const user = await this.dataSource.transaction((manager) =>
+      this.usersService.createWithAccounts(
+        manager,
+        {
+          email: dto.email,
+          name: dto.name,
+          surname: dto.surname,
+          password: passwordHash,
+        },
+        [
+          { currency: Currency.EUR, balance: '500' },
+          { currency: Currency.USD, balance: '1000' },
+        ],
+      ),
+    );
 
     const tokens = await this.createTokens(user.id, user.email);
     await this.saveRefreshTokenHash(user.id, tokens.refreshToken);
@@ -75,7 +77,10 @@ export class AuthService {
     let payload: JwtPayload;
     try {
       payload = await this.jwtService.verifyAsync<JwtPayload>(refreshToken, {
-        secret: this.configService.get<string>('JWT_REFRESH_SECRET', 'refresh_secret'),
+        secret: this.configService.get<string>(
+          'JWT_REFRESH_SECRET',
+          'refresh_secret',
+        ),
       });
     } catch {
       throw new UnauthorizedException('Invalid refresh token');
@@ -100,11 +105,17 @@ export class AuthService {
   private async createTokens(userId: string, email: string) {
     const payload: JwtPayload = { sub: userId, email };
     const accessToken = await this.jwtService.signAsync(payload, {
-      secret: this.configService.get<string>('JWT_ACCESS_SECRET', 'access_secret'),
+      secret: this.configService.get<string>(
+        'JWT_ACCESS_SECRET',
+        'access_secret',
+      ),
       expiresIn: this.getAccessExpiresIn(),
     });
     const refreshToken = await this.jwtService.signAsync(payload, {
-      secret: this.configService.get<string>('JWT_REFRESH_SECRET', 'refresh_secret'),
+      secret: this.configService.get<string>(
+        'JWT_REFRESH_SECRET',
+        'refresh_secret',
+      ),
       expiresIn: this.getRefreshExpiresIn(),
     });
 
@@ -117,10 +128,16 @@ export class AuthService {
   }
 
   private getAccessExpiresIn(): SignOptions['expiresIn'] {
-    return this.configService.get<string>('JWT_ACCESS_EXPIRES_IN', '15m') as SignOptions['expiresIn'];
+    return this.configService.get<string>(
+      'JWT_ACCESS_EXPIRES_IN',
+      '15m',
+    ) as SignOptions['expiresIn'];
   }
 
   private getRefreshExpiresIn(): SignOptions['expiresIn'] {
-    return this.configService.get<string>('JWT_REFRESH_EXPIRES_IN', '7d') as SignOptions['expiresIn'];
+    return this.configService.get<string>(
+      'JWT_REFRESH_EXPIRES_IN',
+      '7d',
+    ) as SignOptions['expiresIn'];
   }
 }

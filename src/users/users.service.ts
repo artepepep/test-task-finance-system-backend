@@ -1,37 +1,50 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 
+import { EntityManager } from 'typeorm';
+
+import { Account } from '../accounts/accounts.entity';
+import { Currency } from '../shared/enums/currency.enum';
 import { User } from './user.entity';
+import { UsersRepository } from './users.repository';
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @InjectRepository(User)
-    private readonly usersRepository: Repository<User>,
-  ) {}
-
-  async create(data: Partial<User>): Promise<User> {
-    const user = this.usersRepository.create(data);
-    return this.usersRepository.save(user);
-  }
+  constructor(private readonly usersRepository: UsersRepository) {}
 
   async findByEmail(email: string): Promise<User | null> {
-    return this.usersRepository.findOne({ where: { email } });
+    return this.usersRepository.findOneByEmail(email);
   }
 
   async findByEmailWithPassword(email: string): Promise<User | null> {
-    return this.usersRepository.findOne({
-      where: { email },
-      select: ['id', 'email', 'name', 'surname', 'password', 'refreshTokenHash'],
-    });
+    return this.usersRepository.findOneByEmailWithPassword(email);
   }
 
-  async findById(id: string): Promise<User | null> {
-    return this.usersRepository.findOne({ where: { id } });
+  async setRefreshTokenHash(
+    userId: string,
+    hash: string | null,
+  ): Promise<void> {
+    await this.usersRepository.update(userId, { refreshTokenHash: hash });
   }
 
-  async setRefreshTokenHash(userId: string, hash: string | null): Promise<void> {
-    await this.usersRepository.update({ id: userId }, { refreshTokenHash: hash });
+  async createWithAccounts(
+    manager: EntityManager,
+    data: Pick<User, 'email' | 'name' | 'surname' | 'password'>,
+    accounts: Array<{ currency: Currency; balance: string }>,
+  ): Promise<User> {
+    const usersRepo = manager.getRepository(User);
+    const accountsRepo = manager.getRepository(Account);
+    const createdUser = usersRepo.create(data);
+    const savedUser = await usersRepo.save(createdUser);
+
+    const createdAccounts = accountsRepo.create(
+      accounts.map((account) => ({
+        userId: savedUser.id,
+        currency: account.currency,
+        balance: account.balance,
+      })),
+    );
+    await accountsRepo.save(createdAccounts);
+
+    return savedUser;
   }
 }

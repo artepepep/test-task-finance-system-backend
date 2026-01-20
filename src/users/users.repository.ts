@@ -15,7 +15,14 @@ export class UsersRepository {
     return this.repository.findOne({ where: { email } });
   }
 
-  async findOneById(id: string): Promise<User | null> {
-    return this.repository.findOne({ where: { id } });
+  async findOneByEmailWithPassword(email: string): Promise<User | null> {
+    return this.repository.findOne({
+      where: { email },
+      select: ['id', 'email', 'name', 'surname', 'password', 'refreshTokenHash'],
+    });
+  }
+
+  async update(userId: string, data: Partial<User>): Promise<void> {
+    await this.repository.update({ id: userId }, data);
   }
 }
